@@ -47,7 +47,12 @@ defmodule ElixirLS.LanguageServer.Providers.Completion do
     {"Kernel", "defstruct"} => "defstruct $1: $2",
     {"ExUnit.Callbacks", "setup"} => "setup ${1:%{$2\\}} do\n\t$3\nend",
     {"ExUnit.Case", "test"} => "test $1 do\n\t$0\nend",
-    {"ExUnit.Case", "describe"} => "describe \"$1\" do\n\t$0\nend"
+    {"ExUnit.Case", "describe"} => "describe \"$1\" do\n\t$0\nend",
+    {"Sparrow.Actor", "pattern"} => "pattern $1 as $2",
+    {"Sparrow.Actor", "reaction"} => "reaction $1 do\n\t$0\nend",
+    {"Sparrow.Actor", "remove"} => "remove $1 , from: $2",
+    {"Sparrow.Actor", "remove_reactions"} => "remove_reactions $1",
+    {"Sparrow.Actor", "react_to"} => "react_to $1, with: $2"
   }
 
   @use_name_only MapSet.new([
@@ -293,7 +298,13 @@ defmodule ElixirLS.LanguageServer.Providers.Completion do
          %{name: name, origin: origin} = item,
          %{def_before: nil} = context
        ) do
+
+    IO.puts "============="
+    IO.puts "from_completion_item name: #{inspect name} origin: #{inspect origin}"
+    IO.inspect context, label: "context"
+    IO.puts "============="
     completion = function_completion(item, context)
+    IO.inspect completion, label: "completion"
 
     completion =
       if origin == "Kernel" || origin == "Kernel.SpecialForms" do
@@ -303,8 +314,10 @@ defmodule ElixirLS.LanguageServer.Providers.Completion do
       end
 
     if snippet = Map.get(@func_snippets, {origin, name}) do
+      IO.puts "Found it"
       %{completion | insert_text: snippet, kind: :snippet, label: name}
     else
+      IO.puts "Not Found it"
       completion
     end
   end
