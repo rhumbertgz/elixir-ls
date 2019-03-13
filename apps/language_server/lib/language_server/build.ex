@@ -1,6 +1,7 @@
 defmodule ElixirLS.LanguageServer.Build do
   alias ElixirLS.LanguageServer.{Server, JsonRpc, SourceFile}
   require Logger
+  alias SparrowLS.SparrowHelper
 
   def build(parent, root_path, fetch_deps?) do
     if Path.absname(File.cwd!()) != Path.absname(root_path) do
@@ -39,6 +40,7 @@ defmodule ElixirLS.LanguageServer.Build do
     diagnostics =
       all_diagnostics
       |> Enum.filter(&(SourceFile.path_to_uri(&1.file) == uri))
+      |> SparrowHelper.format_error_messages
       |> Enum.sort_by(fn %{position: position} -> position end)
 
     diagnostics_json =
